@@ -1,0 +1,330 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#070711">
+<meta name="application-name" content="Kushal Habit Tracker">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<link rel="manifest" href="manifest.webmanifest">
+<title>Kushal Habit Tracker V2</title>
+<style>
+:root{
+  --bg:#070711;--sheet:#101021;--sheet2:#17172d;--head:#0c0c18;
+  --line:#302d55;--line2:#211f3c;--text:#f5f3ff;--muted:#9995b8;
+  --accent:#8b5cf6;--cyan:#22d3ee;--lime:#a3e635;--pink:#f472b6;
+  --done:#a3e635;--doneText:#081006;--danger:#fb7185;
+  --shadow:0 22px 70px rgba(0,0,0,.55),0 0 45px rgba(139,92,246,.10)
+}
+*{box-sizing:border-box}
+html,body{margin:0;min-height:100%;background:
+      radial-gradient(circle at 12% 0%,rgba(139,92,246,.22),transparent 28%),
+      radial-gradient(circle at 90% 12%,rgba(34,211,238,.14),transparent 25%),
+      radial-gradient(circle at 55% 100%,rgba(244,114,182,.10),transparent 28%),
+      #070711;color:var(--text);font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+button,input,select{font:inherit}
+button{color:inherit}
+.app{max-width:1450px;margin:auto;padding:18px 16px 42px}
+.topbar{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:14px}
+.brand{display:flex;gap:11px;align-items:center}
+.logo{width:46px;height:46px;border:1px solid #6d55b8;border-radius:13px;display:grid;place-items:center;font-weight:950;background:linear-gradient(135deg,#25194a,#101b39);box-shadow:0 0 22px rgba(139,92,246,.28);color:#c4b5fd}
+.brand h1{font-size:20px;margin:0;letter-spacing:.6px}.brand p{margin:3px 0 0;color:var(--muted);font-size:11px}
+.actions{display:flex;gap:7px;flex-wrap:wrap}
+.btn{border:1px solid #3c3961;background:#14142a;padding:9px 12px;border-radius:9px;font-size:12px;cursor:pointer;box-shadow:inset 0 1px 0 rgba(255,255,255,.04);transition:.18s}
+.btn.primary{background:linear-gradient(135deg,#8b5cf6,#22d3ee);color:#090910;border-color:transparent;font-weight:900;box-shadow:0 0 22px rgba(139,92,246,.22)}
+.btn:hover{transform:translateY(-1px);border-color:#7064b2}.btn:active{transform:translateY(1px)}
+.controls{display:flex;gap:8px;align-items:center;margin-bottom:10px;flex-wrap:wrap}
+.select{background:#111126;color:#eee;border:1px solid #3c3961;border-radius:8px;padding:9px 12px}
+.sheet{background:rgba(16,16,33,.94);border:1px solid #3a3566;border-radius:16px;box-shadow:var(--shadow);overflow:hidden;backdrop-filter:blur(8px)}
+.sheetTop{display:grid;grid-template-columns:190px 1fr;min-width:1040px}
+.meta{background:linear-gradient(180deg,#191735,#121224);border-right:1px solid var(--line);padding:11px 12px}
+.metaRow{display:grid;grid-template-columns:62px 1fr;align-items:center;margin-bottom:6px}
+.metaRow:last-child{margin-bottom:0}
+.metaLabel{background:#0b0b18;border:1px solid #3a3560;padding:7px 8px;font-weight:900;font-size:11px;color:#b9a9ff}
+.metaValue{padding:7px 9px;font-size:12px;color:#e8e8e3}
+.progressStrip{position:relative;padding:10px 12px;background:linear-gradient(90deg,#10102a,#101a2c);border-bottom:1px solid var(--line)}
+.progressTop{display:flex;justify-content:space-between;align-items:center;font-size:10px;color:var(--muted);margin-bottom:6px}
+.progressTrack{height:7px;background:#25292e;border-radius:99px;overflow:hidden}
+.progressFill{height:100%;width:0;background:linear-gradient(90deg,#8b5cf6,#22d3ee,#a3e635);border-radius:99px;transition:.25s;box-shadow:0 0 12px rgba(34,211,238,.35)}
+.progressCaption{font-size:10px;color:#c7c9ca;margin-top:6px}
+.gridWrap{overflow:auto;touch-action:pan-x pan-y}
+.grid{border-collapse:collapse;min-width:1040px;width:100%;table-layout:fixed}
+.grid th,.grid td{border-right:1px solid var(--line2);border-bottom:1px solid var(--line2);text-align:center}
+.grid th.habitHead,.grid td.habitCell{position:sticky;left:0;z-index:5;background:#171a1e}
+.grid th.habitHead{width:190px;padding:8px 12px;text-align:left;font-size:15px}
+.grid td.habitCell{width:190px;padding:6px 10px;text-align:left}
+.weekHead{height:28px;background:linear-gradient(180deg,#17143a,#0e1022);color:#c4b5fd;font-size:10px;font-weight:900}
+.dayHead{height:40px;background:#121226;color:#d0d2d3;font-size:9px}
+.dayHead strong{display:block;font-size:11px;color:#f4f4f0}
+.dayHead small{display:block;color:#858b91;margin-top:2px}
+.weekLabel{letter-spacing:.5px}
+.todayCol{background:rgba(255,255,255,.045)!important;box-shadow:inset 0 0 0 1px #72777c}
+.habitName{font-size:12px;font-weight:750;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.habitSub{font-size:9px;color:#7f858a;margin-top:3px}
+.checkCell{height:38px;background:#0e0e1d}
+.check{width:21px;height:21px;border-radius:5px;border:1px solid #55517a;background:#16162a;display:inline-grid;place-items:center;cursor:pointer;padding:0;transition:.16s}
+.check.done{background:linear-gradient(135deg,#a3e635,#22d3ee);border-color:#b7ff4d;box-shadow:0 0 13px rgba(163,230,53,.34)}
+.check.done:after{content:"✓";font-size:13px;font-weight:950;color:var(--doneText)}
+.check:active{transform:scale(.9)}
+.totalCell{font-weight:900;font-size:10px;color:#c8c2ff;background:#0d0d1c}
+.rowDelete{float:right;border:0;background:transparent;color:#656b70;font-size:15px;cursor:pointer}
+.rowDelete:hover{color:var(--danger)}
+.summaryRow td{height:28px;background:#0a0a17;color:#aaa5c7;font-size:9px;font-weight:800}
+.summaryRow .habitCell{background:#0b0d10}
+.lower{display:grid;grid-template-columns:1.2fr .8fr;gap:12px;margin-top:12px}
+.panel{background:rgba(16,16,33,.95);border:1px solid #3a3566;border-radius:14px;overflow:hidden;box-shadow:0 12px 35px rgba(0,0,0,.25)}
+.panelHead{padding:11px 13px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center}
+.panelHead h2{margin:0;font-size:12px}.panelHead span{font-size:10px;color:var(--muted)}
+.cards{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;padding:10px}
+.card{background:linear-gradient(145deg,#191735,#11162a);border:1px solid #393566;border-radius:11px;padding:10px;position:relative;overflow:hidden}.card:before{content:"";position:absolute;left:0;top:0;width:3px;height:100%;background:linear-gradient(#8b5cf6,#22d3ee)}
+.card small{display:block;color:var(--muted);font-size:9px}.card strong{display:block;font-size:18px;margin-top:4px}
+.barChart{height:160px;padding:12px 12px 9px;display:flex;align-items:flex-end;gap:4px}
+.barCol{height:100%;flex:1;min-width:12px;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;gap:4px}
+.barTrack{width:100%;max-width:18px;height:118px;background:#19182e;border-radius:4px;display:flex;align-items:flex-end;overflow:hidden;border:1px solid #2d2a50}
+.bar{width:100%;height:0;background:linear-gradient(180deg,#22d3ee,#8b5cf6);border-radius:4px 4px 0 0;transition:.25s;box-shadow:0 0 12px rgba(34,211,238,.2)}
+.barCol span{font-size:8px;color:#747a80}
+.analysis{padding:10px 12px}
+.aRow{display:grid;grid-template-columns:1fr 90px 40px;gap:8px;align-items:center;padding:8px 0;border-bottom:1px solid #262a2f;font-size:10px}
+.aRow:last-child{border-bottom:0}
+.miniTrack{height:5px;background:#252a2f;border-radius:99px;overflow:hidden}.miniFill{height:100%;background:linear-gradient(90deg,#f472b6,#8b5cf6,#22d3ee);border-radius:99px}
+.pct{text-align:right;color:#d8dadb;font-weight:800}
+.tip{padding:0 13px 11px;color:#8d9398;font-size:9px}
+.modal{position:fixed;inset:0;background:rgba(0,0,0,.72);display:none;place-items:center;padding:18px;z-index:20}
+.modal.show{display:grid}
+.modalCard{width:min(430px,100%);background:#15142a;border:1px solid #51488a;border-radius:14px;padding:17px;box-shadow:0 0 45px rgba(139,92,246,.2)}
+.modalCard h2{font-size:17px;margin:0 0 12px}.modalCard input{width:100%;background:#0b0d10;color:white;border:1px solid #3a3f44;border-radius:9px;padding:11px;outline:none}
+.modalActions{display:flex;justify-content:flex-end;gap:7px;margin-top:12px}
+.toast{position:fixed;left:50%;bottom:18px;transform:translate(-50%,20px);opacity:0;pointer-events:none;background:#202428;border:1px solid #444a50;padding:9px 13px;border-radius:9px;font-size:11px;transition:.2s;z-index:30}
+.toast.show{opacity:1;transform:translate(-50%,0)}
+@media(max-width:900px){.lower{grid-template-columns:1fr}.cards{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:600px){.app{padding:10px}.topbar{align-items:flex-start}.brand h1{font-size:17px}.actions .btn{padding:8px}.sheetTop{grid-template-columns:155px 1fr}.grid,.sheetTop{min-width:900px}}
+</style>
+</head>
+<body>
+<div class="app">
+  <header class="topbar">
+    <div class="brand">
+      <div class="logo">K</div>
+      <div><h1>Kushal • HABIT</h1><p>LEVEL UP YOUR REAL LIFE • HABITS = XP</p></div>
+    </div>
+    <div class="actions">
+      <button class="btn" id="todayBtn">TODAY</button>
+      <button class="btn" id="soundBtn">🔊 SFX</button>
+      <button class="btn" id="resetBtn">Reset month</button>
+      <button class="btn primary" id="addBtn">＋ Add habit</button>
+    </div>
+  </header>
+
+  <div class="controls">
+    <select class="select" id="year"></select>
+    <select class="select" id="month"></select>
+    <button class="btn" id="prevBtn">‹ Prev</button>
+    <button class="btn" id="nextBtn">Next ›</button>
+  </div>
+
+  <section class="sheet">
+    <div class="sheetTop">
+      <div class="meta">
+        <div class="metaRow"><div class="metaLabel">Year</div><div class="metaValue" id="metaYear"></div></div>
+        <div class="metaRow"><div class="metaLabel">Month</div><div class="metaValue" id="metaMonth"></div></div>
+      </div>
+      <div class="progressStrip">
+        <div class="progressTop"><span>MONTHLY PROGRESS</span><strong id="progressPct">0%</strong></div>
+        <div class="progressTrack"><div class="progressFill" id="progressFill"></div></div>
+        <div class="progressCaption" id="progressCaption">0 completed habit-days</div>
+        <div style="display:flex;justify-content:space-between;gap:10px;margin-top:7px;font-size:9px;color:#8fdff0">
+          <span id="levelText">LVL 1 • 0 XP</span><span id="rankText">ROOKIE</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="gridWrap">
+      <table class="grid">
+        <thead id="thead"></thead>
+        <tbody id="tbody"></tbody>
+      </table>
+    </div>
+  </section>
+
+  <div class="lower">
+    <section class="panel">
+      <div class="panelHead"><h2>Dashboard</h2><span id="dashMonth"></span></div>
+      <div class="cards">
+        <div class="card"><small>MONTH SCORE</small><strong id="score">0%</strong></div>
+        <div class="card"><small>CURRENT STREAK</small><strong id="streak">0</strong></div>
+        <div class="card"><small>BEST HABIT</small><strong id="best">—</strong></div>
+        <div class="card"><small>PERFECT DAYS</small><strong id="perfect">0</strong></div>
+        <div class="card"><small>XP EARNED</small><strong id="xp">0</strong></div>
+        <div class="card"><small>RANK</small><strong id="rank">ROOKIE</strong></div>
+      </div>
+      <div class="panelHead"><h2>Daily progress</h2><span>each day</span></div>
+      <div class="barChart" id="chart"></div>
+    </section>
+
+    <section class="panel">
+      <div class="panelHead"><h2>Habit analysis</h2><span>completion</span></div>
+      <div class="analysis" id="analysis"></div>
+      <div class="tip">Tip: tap any square. Your score, streak, chart and analysis update immediately and are saved on this device.</div>
+    </section>
+  </div>
+</div>
+
+<div class="modal" id="modal">
+  <div class="modalCard">
+    <h2>Add a habit</h2>
+    <input id="habitInput" maxlength="40" placeholder="e.g. Study 60 min">
+    <div class="modalActions"><button class="btn" id="cancelBtn">Cancel</button><button class="btn primary" id="saveBtn">Add</button></div>
+  </div>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+const KEY="kushal-habit-tracker-v2";
+let soundOn=true;
+function beep(freq=520,duration=.045){
+  if(!soundOn)return;
+  try{const C=window.AudioContext||window.webkitAudioContext,ctx=new C(),o=ctx.createOscillator(),g=ctx.createGain();
+  o.frequency.value=freq;o.type="square";g.gain.value=.025;o.connect(g);g.connect(ctx.destination);o.start();g.gain.exponentialRampToValueAtTime(.0001,ctx.currentTime+duration);o.stop(ctx.currentTime+duration)}catch(e){}
+}
+const defaults=["Wake up at 05:00","Gym / Calisthenics","Reading / Learning","Study","Shop Work","Content Creation","Meal Prep","No unnecessary scrolling","Goal Journaling","Sleep on time"];
+let state=JSON.parse(localStorage.getItem(KEY)||"null")||{habits:defaults,checks:{}};
+const now=new Date();let selectedYear=now.getFullYear(),selectedMonth=now.getMonth();
+const $=id=>document.getElementById(id), pad=n=>String(n).padStart(2,"0");
+const months=["January","February","March","April","May","June","July","August","September","October","November","December"];
+const esc=s=>String(s).replace(/[&<>'"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;","'":"&#39;",'"':"&quot;"}[c]));
+function save(){localStorage.setItem(KEY,JSON.stringify(state))}
+function monthKey(){return selectedYear+"-"+pad(selectedMonth+1)}
+function daysInMonth(){return new Date(selectedYear,selectedMonth+1,0).getDate()}
+function checkKey(h,d,y=selectedYear,m=selectedMonth){return h+"|"+y+"-"+pad(m+1)+"-"+pad(d)}
+function renderSelectors(){
+  $("year").innerHTML="";
+  for(let y=2025;y<=2035;y++)$("year").insertAdjacentHTML("beforeend",`<option value="${y}">${y}</option>`);
+  $("month").innerHTML=months.map((m,i)=>`<option value="${i}">${m}</option>`).join("");
+  $("year").value=selectedYear;$("month").value=selectedMonth;
+}
+function weekNumber(day){
+  const first=new Date(selectedYear,selectedMonth,1);
+  const offset=first.getDay();
+  return Math.floor((offset+day-1)/7)+1;
+}
+function render(){
+  const n=daysInMonth(),today=new Date();
+  $("metaYear").textContent=selectedYear;$("metaMonth").textContent=months[selectedMonth];
+  $("dashMonth").textContent=months[selectedMonth]+" "+selectedYear;
+  let weeks=Math.max(...Array.from({length:n},(_,i)=>weekNumber(i+1)));
+  let head="<tr><th class='habitHead' rowspan='2'>My Habits</th>";
+  for(let w=1;w<=weeks;w++){
+    let count=Array.from({length:n},(_,i)=>i+1).filter(d=>weekNumber(d)===w).length;
+    head+=`<th class='weekHead' colspan='${count}'><span class='weekLabel'>Week ${w}</span></th>`;
+  }
+  head+="<th class='weekHead' rowspan='2'>%</th></tr><tr>";
+  for(let d=1;d<=n;d++){
+    const dt=new Date(selectedYear,selectedMonth,d),isToday=dt.toDateString()===today.toDateString();
+    head+=`<th class='dayHead ${isToday?"todayCol":""}'><strong>${d}</strong><small>${dt.toLocaleDateString(undefined,{weekday:"short"}).slice(0,2)}</small></th>`;
+  }
+  head+="</tr>";$("thead").innerHTML=head;
+
+  let body="";
+  state.habits.forEach((h,hi)=>{
+    let count=0;
+    for(let d=1;d<=n;d++)count+=state.checks[checkKey(h,d)]?1:0;
+    let pct=n?Math.round(count/n*100):0;
+    body+=`<tr><td class="habitCell"><button class="rowDelete" title="Delete habit" onclick="removeHabit(${hi})">×</button><div class="habitName">${esc(h)}</div><div class="habitSub">${count}/${n} completed</div></td>`;
+    for(let d=1;d<=n;d++){
+      const dt=new Date(selectedYear,selectedMonth,d),isToday=dt.toDateString()===today.toDateString(),done=!!state.checks[checkKey(h,d)];
+      body+=`<td class="checkCell ${isToday?"todayCol":""}"><button class="check ${done?"done":""}" aria-label="${esc(h)} day ${d}" onclick="toggle(${hi},${d})"></button></td>`;
+    }
+    body+=`<td class="totalCell">${pct}%</td></tr>`;
+  });
+  if(!state.habits.length)body=`<tr><td class="habitCell">No habits yet</td><td colspan="${n+1}" class="summaryRow">Add one above.</td></tr>`;
+  let totals="<tr class='summaryRow'><td class='habitCell'>DAY SCORE</td>";
+  for(let d=1;d<=n;d++){
+    const c=state.habits.reduce((a,h)=>a+(state.checks[checkKey(h,d)]?1:0),0);
+    const p=state.habits.length?Math.round(c/state.habits.length*100):0;
+    totals+=`<td>${p}%</td>`;
+  }
+  totals+="<td>—</td></tr>";
+  $("tbody").innerHTML=body+totals;
+  updateStats();
+}
+function toggle(hi,d){
+  const h=state.habits[hi],k=checkKey(h,d);
+  if(state.checks[k]){delete state.checks[k];beep(240)}else{state.checks[k]=true;beep(720)}
+  save();render();
+}
+function removeHabit(i){
+  if(!confirm("Remove this habit from the tracker?"))return;
+  state.habits.splice(i,1);save();render();toast("Habit removed");
+}
+function updateStats(){
+  const n=daysInMonth();
+  let done=0,total=state.habits.length*n,dayPct=[];
+  for(let d=1;d<=n;d++){
+    const c=state.habits.reduce((a,h)=>a+(state.checks[checkKey(h,d)]?1:0),0);
+    done+=c;dayPct.push(state.habits.length?Math.round(c/state.habits.length*100):0);
+  }
+  const pct=total?Math.round(done/total*100):0;
+  $("progressPct").textContent=pct+"%";$("score").textContent=pct+"%";
+  $("progressFill").style.width=pct+"%";$("progressCaption").textContent=done+" completed habit-days out of "+total;
+  let best="—",bestPct=-1;
+  state.habits.forEach(h=>{
+    let c=0;for(let d=1;d<=n;d++)c+=state.checks[checkKey(h,d)]?1:0;
+    const p=n?Math.round(c/n*100):0;if(p>bestPct){bestPct=p;best=h}
+  });
+  $("best").textContent=best;
+  let perfect=dayPct.filter(p=>p===100).length;$("perfect").textContent=perfect;
+  let streak=0;
+  for(let i=0;i<365;i++){
+    const dt=new Date();dt.setHours(0,0,0,0);dt.setDate(dt.getDate()-i);
+    const y=dt.getFullYear(),m=dt.getMonth(),d=dt.getDate();
+    if(!state.habits.length)break;
+    if(state.habits.every(h=>state.checks[checkKey(h,d,y,m)]))streak++;else break;
+  }
+  $("streak").textContent=streak;
+  const xp=done*10+streak*25+perfect*20;
+  const level=Math.floor(xp/100)+1;
+  const ranks=["ROOKIE","SCOUT","GRINDER","ELITE","PRO","MASTER","LEGEND"];
+  const rank=ranks[Math.min(ranks.length-1,Math.floor((level-1)/3))];
+  $("xp").textContent=xp;$("rank").textContent=rank;
+  $("levelText").textContent="LVL "+level+" • "+xp+" XP";
+  $("rankText").textContent=rank;
+  $("chart").innerHTML=dayPct.map((p,i)=>`<div class="barCol" title="Day ${i+1}: ${p}%"><div class="barTrack"><div class="bar" style="height:${p}%"></div></div><span>${i+1}</span></div>`).join("");
+  $("analysis").innerHTML=state.habits.map(h=>{
+    let c=0;for(let d=1;d<=n;d++)c+=state.checks[checkKey(h,d)]?1:0;
+    let p=n?Math.round(c/n*100):0;
+    return `<div class="aRow"><strong>${esc(h)}</strong><div class="miniTrack"><div class="miniFill" style="width:${p}%"></div></div><div class="pct">${p}%</div></div>`;
+  }).join("")||"<div style='padding:20px;color:#888'>No habits yet.</div>";
+}
+function goMonth(delta){
+  selectedMonth+=delta;if(selectedMonth<0){selectedMonth=11;selectedYear--}if(selectedMonth>11){selectedMonth=0;selectedYear++}
+  $("year").value=selectedYear;$("month").value=selectedMonth;render();
+}
+$("year").onchange=e=>{selectedYear=+e.target.value;render()};
+$("month").onchange=e=>{selectedMonth=+e.target.value;render()};
+$("prevBtn").onclick=()=>goMonth(-1);$("nextBtn").onclick=()=>goMonth(1);
+$("soundBtn").onclick=()=>{soundOn=!soundOn;$("soundBtn").textContent=soundOn?"🔊 SFX":"🔇 SFX";toast(soundOn?"SFX on":"SFX off")};
+$("todayBtn").onclick=()=>{selectedYear=now.getFullYear();selectedMonth=now.getMonth();$("year").value=selectedYear;$("month").value=selectedMonth;render()};
+$("resetBtn").onclick=()=>{
+  if(!confirm("Clear every check in this month?"))return;
+  const n=daysInMonth();state.habits.forEach(h=>{for(let d=1;d<=n;d++)delete state.checks[checkKey(h,d)]});
+  save();render();toast("Month reset");
+};
+const modal=$("modal");
+$("addBtn").onclick=()=>{modal.classList.add("show");$("habitInput").value="";setTimeout(()=>$("habitInput").focus(),20)};
+$("cancelBtn").onclick=()=>modal.classList.remove("show");
+modal.onclick=e=>{if(e.target===modal)modal.classList.remove("show")};
+$("saveBtn").onclick=addHabit;
+$("habitInput").onkeydown=e=>{if(e.key==="Enter")addHabit()};
+function addHabit(){
+  const v=$("habitInput").value.trim();if(!v)return;
+  if(state.habits.includes(v)){toast("That habit already exists");return}
+  state.habits.push(v);save();modal.classList.remove("show");render();toast("Habit added ✓");
+}
+function toast(t){const el=$("toast");el.textContent=t;el.classList.add("show");clearTimeout(window.__toast);window.__toast=setTimeout(()=>el.classList.remove("show"),1500)}
+renderSelectors();render();
+</script>
+<script>if("serviceWorker" in navigator){window.addEventListener("load",()=>navigator.serviceWorker.register("sw.js").catch(()=>{}));}</script>
+</body>
+</html>
