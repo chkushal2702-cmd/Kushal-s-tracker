@@ -328,3 +328,61 @@ renderSelectors();render();
 <script>if("serviceWorker" in navigator){window.addEventListener("load",()=>navigator.serviceWorker.register("sw.js").catch(()=>{}));}</script>
 </body>
 </html>
+<style>
+.tasksWrap{max-width:1450px;margin:12px auto 42px;padding:0 16px}
+.taskAdd{display:flex;gap:8px;padding:10px 12px}
+.taskAdd input{flex:1;background:#0b0d10;color:#fff;border:1px solid #3a3f44;border-radius:9px;padding:11px;outline:none}
+.taskItem{display:flex;align-items:center;gap:10px;padding:10px 12px;border-top:1px solid var(--line2)}
+.taskItem .txt{flex:1;font-size:13px}
+.taskItem.done .txt{text-decoration:line-through;color:var(--muted)}
+.taskItem .old{font-size:9px;color:var(--pink)}
+.taskDel{border:0;background:transparent;color:#656b70;font-size:20px;cursor:pointer}
+.taskEmpty{padding:14px 12px;color:var(--muted);font-size:12px}
+</style>
+<div class="tasksWrap">
+<section class="panel">
+  <div class="panelHead"><h2>Today's Tasks</h2><span id="taskInfo">0/0 done • 0 XP</span></div>
+  <div class="taskAdd"><input id="taskInput" maxlength="60" placeholder="e.g. Maths 1B chapter"><button class="btn primary" id="taskAddBtn">＋ Add</button></div>
+  <div id="taskList"></div>
+</section>
+</div>
+<script>
+(function(){
+const TK="kushal-tasks-v1";
+let tasks=[];
+try{tasks=JSON.parse(localStorage.getItem(TK)||"[]")}catch(e){tasks=[]}
+const el=id=>document.getElementById(id);
+function today(){const d=new Date();return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0")}
+function save(){localStorage.setItem(TK,JSON.stringify(tasks))}
+function safe(s){return String(s).replace(/[&<>'"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;","'":"&#39;",'"':"&quot;"}[c]))}
+function render(){
+  const t=today();
+  const list=tasks.filter(x=>x.date===t||(!x.done&&x.date<t));
+  const done=list.filter(x=>x.done).length;
+  const xp=tasks.filter(x=>x.done).length*15;
+  el("taskInfo").textContent=done+"/"+list.length+" done • "+xp+" XP";
+  el("taskList").innerHTML=list.length?list.map(x=>
+    `<div class="taskItem ${x.done?"done":""}">
+      <button class="check ${x.done?"done":""}" data-act="tog" data-id="${x.id}"></button>
+      <div class="txt">${safe(x.text)} ${x.date<t?'<span class="old">• from earlier</span>':''}</div>
+      <button class="taskDel" data-act="del" data-id="${x.id}">×</button>
+    </div>`).join(""):'<div class="taskEmpty">No tasks yet. Add your first one 👆</div>';
+}
+function add(){
+  const v=el("taskInput").value.trim();
+  if(!v)return;
+  tasks.push({id:Date.now(),text:v,date:today(),done:false});
+  el("taskInput").value="";save();render();
+}
+el("taskAddBtn").onclick=add;
+el("taskInput").addEventListener("keydown",e=>{if(e.key==="Enter")add()});
+el("taskList").addEventListener("click",e=>{
+  const b=e.target.closest("button");if(!b)return;
+  const id=+b.dataset.id,x=tasks.find(k=>k.id===id);if(!x)return;
+  if(b.dataset.act==="tog"){x.done=!x.done;if(x.done)x.date=today()}
+  if(b.dataset.act==="del")tasks=tasks.filter(k=>k.id!==id);
+  save();render();
+});
+render();
+})();
+</script>
